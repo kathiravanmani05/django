@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Texas Counties</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- Bootstrap Theme CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+</head>
+
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <div class="container-fluid justify-content-end"> <!-- Add justify-content-end class -->
+            <form class="form-inline">
+                {% if request.user.is_authenticated %}
+                <a class="nav-link" aria-current="page" href="{% url 'home' %}"><i class="fa fa-home"></i>Home</a>
+                <a class="nav-link" aria-current="page" href="#"><i class="fa fa-home"></i>{{request.user}}</a>
+                <a class="nav-link" aria-current="page" href="{% url 'logout' %}"><i class="fa fa-home"></i>Logout</a>
+                {% else %}
+                <a class="nav-link" href="{% url 'login' %}"><i class="fa fa-sign-in"></i>Login</a>
+                <a class="nav-link" href="{% url 'register' %}"><i class="fa fa-user"></i>Register</a>
+                {% endif %}  
+            </form>
+        </div>
+    </nav>
+
+    {% block content%}
+
+    {% endblock %}
+
+</body>
+</html>

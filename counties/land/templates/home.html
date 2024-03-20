@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="p-5 text-center bg-image rounded-3" style="background-image: url('https://mdbcdn.b-cdn.net/img/new/slides/041.webp');height: 400px;">
+        <div class="mask" style="background-color: rgba(0, 0, 0, 0.6);">
+            <div class="d-flex justify-content-center align-items-center h-100">
+                <div class="text-white">
+                    <h1 class="mb-3" style="color: white;">Texas Counties</h1>
+                    <h4 class="mb-3">Subheading</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid" style="margin-top: 20px;">
+        <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by APN or Owner Name">
+        <table class="table table-striped table-dark" id="dataTable">
+            <!-- Table header and body here -->
+        </table>
+    </div>
+
+    <div class="container-fluid" style="margin-top: 20px;">
+        <table class="table table-striped table-dark" id="dataTable">
+            <thead class="thead-dark text-center">
+                <tr>
+                    <th scope="col">APN</th>
+                    <th scope="col">Owner Name</th>
+                    <th scope="col">Property State</th>
+                    <th scope="col">Property County
+                        <select id="propertyCountyFilter" class="form-control">
+                            <option value="">All Counties</option>
+                            <!-- Add options for all available counties -->
+                            <option value="COMAL">COMAL</option>
+                            <option value="LIBERTY">LIBERTY</option>
+                            <!-- Add more options for all available counties -->
+                        </select>
+                    </th>
+                    <th scope="col">Address</th>
+                    <th scope="col">City</th>
+                    <th scope="col">State</th>
+                    <th scope="col">Zip</th>
+                    <th scope="col">Acreage
+                      <select id="acreageFilter" class="form-control">
+                        <option value="">All Acreages</option>
+                        <option value="0.2-0.5">0.2 to 0.5 acres</option>
+                        <option value="0.5-1">0.5 to 1 acre</option>
+                        <option value="1+">More than 1 acre</option>
+                      </select>
+                    </th>
+                    
+                    <th scope="col">Market Value</th>
+                    <th scope="col">Assessed Value
+                        <select id="assessedValueFilter" class="form-control">
+                            <option value="">All Assessed Values</option>
+                            <option value="0-10000">0 to 10000</option>
+                            <option value="10000-50000">10000 to 50000</option>
+                            <option value="50000+">More than 50000</option>
+                        </select>
+                      </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Your table data goes here -->
+                {% for data in scraped_data %}
+                <tr>
+                    <td><a href="{% url 'apn_details' data.APN %}">{{ data.APN }}</a></td>
+                    <td>{{ data.owner_name }}</td>
+                    <td>{{ data.Property_State }}</td>
+                    <td>{{ data.Property_County }}</td>
+                    <td>{{ data.address }}</td>
+                    <td>{{ data.city }}</td>
+                    <td>{{ data.state }}</td>
+                    <td>{{ data.zip }}</td>
+                    <td>{{ data.acreage }}</td>
+                    <td>{{ data.market_value }}</td>
+                    <td>{{ data.assessed_value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <button id="downloadButton" class="btn btn-primary">Download Filtered Data</button>
+
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            $('#propertyCountyFilter, #acreageFilter, #assessedValueFilter').on('change', function(){
+                var selectedCounty = $('#propertyCountyFilter').val().toLowerCase();
+                var selectedAcreage = $('#acreageFilter').val();
+                var selectedAssessedValue = $('#assessedValueFilter').val();
+                $('#dataTable tbody tr').each(function(){
+                    var county = $(this).children('td:eq(3)').text().toLowerCase();
+                    var acreage = $(this).children('td:eq(8)').text();
+                    var assessedValue = $(this).children('td:eq(10)').text();
+                    var acreageValue = parseFloat(acreage);
+                    var assessedValueNumeric = parseFloat(assessedValue.replace(/[^0-9.-]+/g,"")); // Extract numeric value from string
+                    if ((selectedCounty === '' || county === selectedCounty) && 
+                        (selectedAcreage === '' || selectedAcreage === '1+' || 
+                            (selectedAcreage === '0.2-0.5' && acreageValue >= 0.2 && acreageValue <= 0.5) || 
+                            (selectedAcreage === '0.5-1' && acreageValue > 0.5 && acreageValue <= 1) || 
+                            (selectedAcreage === '1+' && acreageValue > 1)) &&
+                        (selectedAssessedValue === '' || 
+                            (selectedAssessedValue === '0-10000' && assessedValueNumeric >= 0 && assessedValueNumeric <= 10000) || 
+                            (selectedAssessedValue === '10000-50000' && assessedValueNumeric > 10000 && assessedValueNumeric <= 50000) || 
+                            (selectedAssessedValue === '50000+' && assessedValueNumeric > 50000))) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+    
+            // Function to download filtered data
+            $('#downloadButton').on('click', function() {
+                var filteredData = [];
+                var headers = [];
+                
+                // Extract table headers
+                $('#dataTable th').each(function() {
+                    headers.push('"' + $(this).text().trim() + '"');
+                });
+                filteredData.push(headers.join(','));
+    
+                // Extract table rows
+                $('#dataTable tbody tr:visible').each(function(){
+                    var rowData = [];
+                    $(this).find('td').each(function(){
+                        // Wrap each cell's content in double quotes to handle cases with commas or newline characters
+                        rowData.push('"' + $(this).text().trim() + '"');
+                    });
+                    filteredData.push(rowData.join(','));
+                });
+    
+                var csvContent = "data:text/csv;charset=utf-8," + filteredData.join('\n');
+                var encodedUri = encodeURI(csvContent);
+                var link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "filtered_data.csv");
+                document.body.appendChild(link);
+                link.click();
+            });
+        });
+        $(document).ready(function(){
+    // Existing code for filtering by county, acreage, and assessed value
+
+    // Search functionality
+    $('#searchInput').on('input', function() {
+        var searchText = $(this).val().toLowerCase();
+        $('#dataTable tbody tr').each(function(){
+            var apn = $(this).children('td:eq(0)').text().toLowerCase();
+            var ownerName = $(this).children('td:eq(1)').text().toLowerCase();
+            if (apn.includes(searchText) || ownerName.includes(searchText)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
+});
+    </script>
+    
+    
+{% endblock %}
