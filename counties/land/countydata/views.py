@@ -1,9 +1,7 @@
 import pandas as pd
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import ScrapedData
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.shortcuts import get_object_or_404
 from . forms import ScrapedDataForm
 
 def home(request):
@@ -22,17 +20,15 @@ def apn_details(request, apn):
     
     return render(request, 'property_details.html', {'property_details': property_details})
 
-def edit_scraped_data(request, apn):
-    scraped_data = get_object_or_404(ScrapedData, APN=apn)
-    
+def update_property_details(request, apn):
+    property_details = get_object_or_404(ScrapedData, APN=apn)
     if request.method == 'POST':
-        form = ScrapedDataForm(request.POST, instance=scraped_data)
+        form = ScrapedDataForm(request.POST, instance=property_details)
         if form.is_valid():
             form.save()
-            return redirect('apn_details', apn=apn)
+            return redirect('apn_details', apn=apn)  # Redirect to the correct view name
     else:
-        form = ScrapedDataForm(instance=scraped_data)
-    
-    return render(request, 'edit_scraped_data.html', {'form': form})
+        form = ScrapedDataForm(instance=property_details)
+    return render(request, 'update_property_details.html', {'form': form})
 
 

@@ -1,0 +1,19 @@
+{% block content %}
+
+<!-- edit_scraped_data.html -->
+<form method="post" novalidate>
+    {% csrf_token %}
+    {% for field in form %}
+    <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {% if field.name == 'email' %}
+            <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="{{ field.field.widget.attrs.class }}" {% if field.value %}value="{{ field.value }}"{% endif %}>
+        {% else %}
+            {{ field }}
+        {% endif %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+{% endblock content %}

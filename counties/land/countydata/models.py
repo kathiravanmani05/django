@@ -19,7 +19,7 @@ class ScrapedData(models.Model):
     agricultural_market_valuation = models.CharField(max_length=25,null = True)
     assessed_value = models.CharField(max_length=25,null = True)
     market_value = models.CharField(max_length=25, null = True)
-    email = models.CharField(max_length=250, null = True ,default='')
+    email = models.CharField(max_length=250, null = True ,default='test@test.com')
     phone_number = models.CharField(max_length=150, null = True , default='')
     comment = models.TextField(default='')
     offer_amount = models.CharField(max_length=25,null = True, default='')

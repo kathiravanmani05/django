@@ -10,5 +10,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('', views.home, name = 'home'),
     path('details/<str:apn>/', views.apn_details, name='apn_details'),
-    path('edit/<str:apn>/', views.edit_scraped_data, name='edit_scraped_data'),
+    path('property/<str:apn>/update/', views.update_property_details, name='update_property_details'),
 ]

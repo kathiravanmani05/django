@@ -2,163 +2,81 @@
 {% block content %}
 <div class="container">
     <h2>Property Details</h2>
-    <table class="table">
-        <tbody>
-            <tr>
-                <th scope="row">APN</th>
-                <td id="apn">{{ property_details.APN }}</td>
-            </tr>
-            <!-- Add new fields -->
-            <tr>
-                <th scope="row">Owner Name</th>
-                <td id="owner_name" contenteditable>{{ property_details.owner_name }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Property State</th>
-                <td id="property_state" contenteditable>{{ property_details.Property_State }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Property County</th>
-                <td id="property_county" contenteditable>{{ property_details.Property_County }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Address</th>
-                <td id="address" contenteditable>{{ property_details.address }}</td>
-            </tr>
-            <tr>
-                <th scope="row">City</th>
-                <td id="city" contenteditable>{{ property_details.city }}</td>
-            </tr>
-            <tr>
-                <th scope="row">State</th>
-                <td id="state" contenteditable>{{ property_details.state }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Zip</th>
-                <td id="zip" contenteditable>{{ property_details.zip }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Acreage</th>
-                <td id="acreage" contenteditable>{{ property_details.acreage }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Market Value</th>
-                <td id="market_value" contenteditable>{{ property_details.market_value }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Assessed Value</th>
-                <td id="assessed_value" contenteditable>{{ property_details.assessed_value }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Offer Amount</th>
-                <td id="offer_amount" contenteditable>{{ property_details.offer_amount }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Tax Due</th>
-                <td id="tax_due" contenteditable>{{ property_details.tax_due }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Email</th>
-                <td id="email" contenteditable>{{ property_details.email }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Phone Number</th>
-                <td id="phone_number" contenteditable>{{ property_details.phone_number }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Comment</th>
-                <td id="comment" contenteditable>{{ property_details.comment }}</td>
-            </tr>
-            <tr>
-                <th scope="row">Last Updated</th>
-                <td>{{ property_details.last_updated }}</td>
-            </tr>
-        </tbody>
-    </table>
-    <button id="saveBtn" class="btn btn-primary">Save Changes</button>
-</div>
-{% endblock content %}
-
-{% block script %}
-<script>
-    // JavaScript code to handle inline editing
-    document.querySelectorAll('[contenteditable]').forEach(item => {
-        item.addEventListener('blur', function() {
-            const fieldName = this.id;
-            const fieldValue = this.innerText;
-            const apn = document.getElementById('apn').innerText;
-            // Send AJAX request to update the field
-            fetch(`/update/${apn}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    field: fieldName,
-                    value: fieldValue
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                // Handle success response
-            })
-            .catch(error => {
-                console.error('There was a problem with your fetch operation:', error);
-                // Handle error
-            });
-        });
-    });
-</script>
-{% endblock script %}
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const editableFields = document.querySelectorAll("[contenteditable]");
-
-        editableFields.forEach(field => {
-            field.addEventListener("input", function() {
-                const fieldName = this.id;
-                const fieldValue = this.innerText.trim();
-
-                // Send AJAX request to update the field value
-                updateFieldValue(fieldName, fieldValue);
-            });
-        });
-
-        function updateFieldValue(fieldName, fieldValue) {
-            const apn = "{{ property_details.APN }}";  // Assuming you have access to the APN
-            const url = `/update_fields/${apn}/`;  // URL to your Django view
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'  // Include CSRF token
-                },
-                body: JSON.stringify({ [fieldName]: fieldValue })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to update field');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Field updated successfully');
-            })
-            .catch(error => {
-                console.error('Error updating field:', error);
-            });
-        }
-    });
-    document.getElementById('saveBtn').addEventListener('click', function() {
-
-    });
-</script>
+    <form method="post" action="{% url 'update_property_details' property_details.APN %}">
+        {% csrf_token %}
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th scope="row">APN</th>
+                    <td>{{ property_details.APN }}</td>
+                </tr>
+                <!-- Add new fields -->
+                <tr>
+                    <th scope="row">Owner Name</th>
+                    <td><input type="text" name="owner_name" value="{{ property_details.owner_name }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Property State</th>
+                    <td><input type="text" name="property_state" value="{{ property_details.Property_State }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Property County</th>
+                    <td><input type="text" name="property_county" value="{{ property_details.Property_County }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Address</th>
+                    <td><input type="text" name="address" value="{{ property_details.address }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">City</th>
+                    <td><input type="text" name="city" value="{{ property_details.city }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">State</th>
+                    <td><input type="text" name="state" value="{{ property_details.state }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Zip</th>
+                    <td><input type="text" name="zip" value="{{ property_details.zip }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Acreage</th>
+                    <td><input type="text" name="acreage" value="{{ property_details.acreage }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Market Value</th>
+                    <td><input type="text" name="market_value" value="{{ property_details.market_value }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Assessed Value</th>
+                    <td><input type="text" name="assessed_value" value="{{ property_details.assessed_value }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Offer Amount</th>
+                    <td><input type="text" name="offer_amount" value="{{ property_details.offer_amount }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Tax Due</th>
+                    <td><input type="text" name="tax_due" value="{{ property_details.tax_due }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Email</th>
+                    <td><input type="email" name="email" value="{{ property_details.email }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Phone Number</th>
+                    <td><input type="text" name="phone_number" value="{{ property_details.phone_number }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Comment</th>
+                    <td><input type="text" name="comment" value="{{ property_details.comment }}"></td>
+                </tr>
+                <tr>
+                    <th scope="row">Last Updated</th>
+                    <td>{{ property_details.last_updated }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+{% endblock content %}    
